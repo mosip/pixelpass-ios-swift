@@ -16,7 +16,7 @@ class PixelPassTests: XCTestCase {
     
     func testEncodeStandardInput() {
         let inputString = "Hello, World!"
-        let encoded = pixelPass.encode(inputString)
+        let encoded = pixelPass.generateQRData(inputString)
         let expectedEncodedString="V7F0YUV0QBNP:AAT8QZPP+AAV00./JG2"
         XCTAssertNotNil(encoded, "The encoded output should not be nil for standard input.")
         XCTAssertTrue(encoded!.count > 0, "The encoded string should have length greater than zero.")
@@ -25,7 +25,7 @@ class PixelPassTests: XCTestCase {
     
     func testEncodeEmptyInput() {
         let emptyInput = ""
-        let encoded = pixelPass.encode(emptyInput)
+        let encoded = pixelPass.generateQRData(emptyInput)
         XCTAssertNil(encoded, "Encoding should return nil for an empty string.")
     }
     
@@ -49,7 +49,7 @@ class PixelPassTests: XCTestCase {
     func testEncodeAndDecodeCycle() {
         // Test case for non-empty string
         let inputString = "Hello, this is a test string for PixelPass encoding and decoding."
-        if let encoded = pixelPass.encode(inputString),
+        if let encoded = pixelPass.generateQRData(inputString),
            let decodedData = pixelPass.decode(data: encoded),
            let decodedString = String(data: decodedData, encoding: .utf8) {
             XCTAssertEqual(decodedString, inputString, "The decoded string should match the original input string.")
@@ -59,7 +59,7 @@ class PixelPassTests: XCTestCase {
         
         // Test case for empty string
         let emptyInput = ""
-        XCTAssertNil(pixelPass.encode(emptyInput), "Encoding should return nil for an empty string.")
+        XCTAssertNil(pixelPass.generateQRData(emptyInput), "Encoding should return nil for an empty string.")
     }
     
     func testGenerateQRCode() {

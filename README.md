@@ -39,6 +39,26 @@ if let qrCodeData = pixelPass.generateQRCode(data: "Hello, World!", ecc: .M, hea
     // Use qrCodeData in your application (e.g., display in an ImageView)
 }
 ```
+### `generateQRData(input: String) -> String?`
+
+Generates a Base45 encoded string from the provided input after compressing it using Zlib. This method handles the compression and encoding of the input string.
+
+**Parameters:**
+- `input`: The string to compress and encode.
+
+**Returns:**
+- The Base45 encoded string, or `nil` if an error occurs.
+
+**Example Usage:**
+
+```swift
+let pixelPass = PixelPass()
+if let encodedString = pixelPass.generateQRData("Hello, World!") {
+    print(encodedString)
+} else {
+    print("Failed to generate QR data.")
+}
+```
 
 ### `decode(data: String) -> Data?`
 
