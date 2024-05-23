@@ -23,7 +23,7 @@ import UIKit
         }
     }
     
-    public func encode(_ input: String) -> String? {
+    public func generateQRData(_ input: String) -> String? {
         if(input.elementsEqual(""))
         {
             return nil;
@@ -43,7 +43,7 @@ import UIKit
     }
     
      public func generateQRCode(data: String, ecc: ECC = ECC.L, header: String = "") -> Data? {
-         var qrText = encode(data)
+         var qrText = generateQRData(data)
          if qrText == nil {
              return nil
          } else {
