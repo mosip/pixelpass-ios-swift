@@ -2,9 +2,11 @@ import Foundation
 import base45_swift
 import CoreImage
 import Compression
+import SwiftCBOR
+import OSLog
 #if canImport(UIKit)
 import UIKit
- public class PixelPass {
+public class PixelPass {
     public init()
     {
         
@@ -13,15 +15,29 @@ import UIKit
         do {
             let base45DecodedData = try data.fromBase45()
             guard let decompressedData = Zlib().decompress(base45DecodedData) else {
-                print("Error decompressing data")
+                os_log("Error decompressing data",log: OSLog.default,type: OSLogType.error)
                 return nil
             }
-            return decompressedData
+            let byteArray = String(data:decompressedData,encoding: .ascii)?.hexaBytes
+            if let cborDecodedData = try? CBOR.decode(byteArray!) {
+                if let cborDecodedDataJsonDictionary = cborDecodedData.converToJsonCompatibleFormat() as? [String: Any], JSONSerialization.isValidJSONObject(cborDecodedDataJsonDictionary) {
+                    let jsonData = try JSONSerialization.data(
+                        withJSONObject: cborDecodedDataJsonDictionary,
+                        options: [.withoutEscapingSlashes]
+                    )
+                    return jsonData
+                } else {
+                    os_log("Decoded CBOR data is not a valid JSON object",log: OSLog.default,type: OSLogType.error)
+                    return decompressedData                }
+            } else {
+                return decompressedData
+            }
         } catch {
-            print("Error during Base45 decoding or decompression: \(error)")
+            os_log("Error during Base45 decoding, decompression, or CBOR decoding",log: OSLog.default,type: OSLogType.error)
             return nil
         }
     }
+    
     
     public func generateQRData(_ input: String) -> String? {
         if(input.elementsEqual(""))
@@ -30,43 +46,43 @@ import UIKit
         }
         guard Zlib().compress(data:input,algorithm:COMPRESSION_ZLIB) != nil
         else {
-            print("Error compressing data")
+            os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
             return nil
         }
         let compressedData =  Zlib().compress(data:input,algorithm:COMPRESSION_ZLIB)
         guard let base45EncodedString = compressedData?.toBase45()
         else{
-            print("Encoding error")
+            os_log("Encoding error",log: OSLog.default,type: OSLogType.error)
             return nil;
         }
         return base45EncodedString
     }
     
-     public func generateQRCode(data: String, ecc: ECC = ECC.L, header: String = "") -> Data? {
-         var qrText = generateQRData(data)
-         if qrText == nil {
-             return nil
-         } else {
-             qrText! += header
-         }
-         let data = qrText?.data(using: String.Encoding.ascii)
-         
-         if let filter = CIFilter(name: "CIQRCodeGenerator") {
-             filter.setValue(data, forKey: "inputMessage")
-             filter.setValue(ecc.rawValue, forKey: "inputCorrectionLevel")
-             
-             if let qrImage = filter.outputImage {
-                 let context = CIContext(options: nil)
-                 if let cgImage = context.createCGImage(qrImage, from: qrImage.extent) {
-                     let uiImage = UIImage(cgImage: cgImage)
-                     return uiImage.pngData() // Get PNG data
-                 }
-             }
-         }
-         
-         return nil
-     }
-
+    public func generateQRCode(data: String, ecc: ECC = ECC.L, header: String = "") -> Data? {
+        var qrText = generateQRData(data)
+        if qrText == nil {
+            return nil
+        } else {
+            qrText! += header
+        }
+        let data = qrText?.data(using: String.Encoding.ascii)
+        
+        if let filter = CIFilter(name: "CIQRCodeGenerator") {
+            filter.setValue(data, forKey: "inputMessage")
+            filter.setValue(ecc.rawValue, forKey: "inputCorrectionLevel")
+            
+            if let qrImage = filter.outputImage {
+                let context = CIContext(options: nil)
+                if let cgImage = context.createCGImage(qrImage, from: qrImage.extent) {
+                    let uiImage = UIImage(cgImage: cgImage)
+                    return uiImage.pngData() // Get PNG data
+                }
+            }
+        }
+        
+        return nil
+    }
+    
     
 }
 #endif

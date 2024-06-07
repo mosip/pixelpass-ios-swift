@@ -73,4 +73,14 @@ class PixelPassTests: XCTestCase {
         let incorrectBase45String = "This is not a Base45 string"
         XCTAssertNil(pixelPass.decode(data: incorrectBase45String), "Decode should return nil for incorrect Base45 encoded strings.")
     }
+    
+    func testDecodeValidInputCBOR() {
+        let inputString = "NCFHPE/Q6:96+963Y6:96P563H0 %2DH0"
+        let decodedData = pixelPass.decode(data: inputString)
+        
+        let expectedDecodedString="{\"temp\":15}"
+        XCTAssertNotNil(decodedData, "Decoding should succeed for valid encoded input.")
+        let decodedString = String(data: decodedData!, encoding: .utf8)
+        XCTAssertEqual(decodedString, expectedDecodedString, "The decoded string should match the expected decoded string.")
+    }
 }
