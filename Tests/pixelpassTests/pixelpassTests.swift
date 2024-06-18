@@ -91,4 +91,14 @@ class PixelPassTests: XCTestCase {
         XCTAssertTrue(encoded!.count > 0, "The encoded string should have length greater than zero.")
         XCTAssertEqual(encoded,expectedEncodedString, "Encoded string should be same as expected encoded string")
     }
+    
+    func testEncodeAndDecodeInputCBOR() {
+        let inputString = "{\"temp\":123}],\"bool\":true,\"arryF\":[1,2.5,3,-4,\"hello\",{\"temp\":123}],\"arryE\":[]}"
+        let encoded = pixelPass.generateQRData(inputString)!
+        let decoded = pixelPass.decode(data: encoded)
+        let decodedString = String(data: decoded!, encoding: .utf8)
+        XCTAssertNotNil(decodedString, "Decoding should succeed for valid encoded input.")
+        XCTAssertEqual(inputString,decodedString, "Decoded string should be same as expected input string")
+    }
+    
 }
