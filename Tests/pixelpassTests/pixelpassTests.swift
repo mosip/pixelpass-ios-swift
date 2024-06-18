@@ -74,13 +74,25 @@ class PixelPassTests: XCTestCase {
         XCTAssertNil(pixelPass.decode(data: incorrectBase45String), "Decode should return nil for incorrect Base45 encoded strings.")
     }
     
-    func testDecodeValidInputCBOR() {
-        let inputString = "NCFHPE/Q6:96+963Y6:96P563H0 %2DH0"
+    func testDecodeValidInputCBOR() { // how it is passing?
+        let inputString = "NCFHPE/Q6:96+963Y6:96P563H0 %2DH0" // where this string came from?
+//        NCF3QBXJA5NJRCOC004 QN4 // why hexabytes? // correct?
         let decodedData = pixelPass.decode(data: inputString)
-        
         let expectedDecodedString="{\"temp\":15}"
         XCTAssertNotNil(decodedData, "Decoding should succeed for valid encoded input.")
         let decodedString = String(data: decodedData!, encoding: .utf8)
         XCTAssertEqual(decodedString, expectedDecodedString, "The decoded string should match the expected decoded string.")
+    }
+    
+    func testEncodeValidInputCBOR() {
+        //NCF3QBXJA5NJRCOC004 QN4 = kotlin
+        //V7F3QBXJA5NJRCOC004 QN4 = swift // V7?
+        //NCF3QBXJA5NJRCOC004 QN4 = JS
+        let inputString = "{\"temp\":-15}"
+        let encoded = pixelPass.generateQRData(inputString)
+        let expectedEncodedString = "NCF3QBXJA5NJRCOC004 QN4" // expected correct?
+        XCTAssertNotNil(encoded!, "The encoded output should not be nil for standard input.")
+        XCTAssertTrue(encoded!.count > 0, "The encoded string should have length greater than zero.")
+        XCTAssertEqual(encoded,expectedEncodedString, "Encoded string should be same as expected encoded string")
     }
 }
