@@ -2,28 +2,15 @@ import Foundation
 import SwiftCBOR
 import OSLog
 
-extension StringProtocol {
-    var hexaData: Data { .init(hexa) }
-    var hexaBytes: [UInt8] { .init(hexa) }
-    private var hexa: UnfoldSequence<UInt8, Index> {
-        sequence(state: startIndex) { startIndex in
-            guard startIndex < self.endIndex else { return nil }
-            let endIndex = self.index(startIndex, offsetBy: 2, limitedBy: self.endIndex) ?? self.endIndex
-            defer { startIndex = endIndex }
-            return UInt8(self[startIndex..<endIndex], radix: 16)
-        }
-    }
-}
-
 extension CBOR {
-    func converToJsonCompatibleFormat() -> Any { // negative int?
+    func converToJsonCompatibleFormat() -> Any {
         switch self {
         case .array(let array):
             return array.map {
                 $0.converToJsonCompatibleFormat()
             }
         case .map(let map):
-            var dict = [String: Any]() // preserve order needed?
+            var dict = [String: Any]()
             for (key, value) in map {
                 if case let .utf8String(keyString) = key {
                     dict[keyString] = value.converToJsonCompatibleFormat()
@@ -51,13 +38,13 @@ extension CBOR {
     }
 }
 
-func convertToCBOREncodableFormat(input: Any) -> CBOR? { // negative int?
+func convertToCBOREncodableFormat(input: Any) -> CBOR? {
     switch input {
     case let array as [Any]:
         return .array(array.compactMap { convertToCBOREncodableFormat(input: $0) })
 
     case let dict as [String: Any]:
-           var map = [CBOR: CBOR]() // preserve order needed?
+           var map = [CBOR: CBOR]()
         for (key, value) in dict {
             if let keyCbor = convertToCBOREncodableFormat(input: key),
                let valueCbor = convertToCBOREncodableFormat(input: value) {
@@ -74,15 +61,12 @@ func convertToCBOREncodableFormat(input: Any) -> CBOR? { // negative int?
     case let base64String as String:
         let data = Data(base64Encoded: base64String)
         return .byteString([UInt8](data!))
-    
-    case let bool as Bool:
-        return .boolean(bool)
         
     case let unsignedInt as UInt64:
         return .unsignedInt(unsignedInt)
-
-//    case let signedInt as Int:
-//        return .negativeInt(UInt64(truncating: signedInt as NSNumber))
+    
+    case let bool as Bool:
+        return .boolean(bool)
         
     case let double as Double:
         return .double(double)

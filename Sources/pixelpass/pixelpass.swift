@@ -18,9 +18,8 @@ public class PixelPass {
                 os_log("Error decompressing data",log: OSLog.default,type: OSLogType.error)
                 return nil
             }
-            //let byteArray = String(data:decompressedData,encoding: .ascii)?.hexaBytes
-            let uintDecompressed = [UInt8](decompressedData)
-            if let cborDecodedData = try? CBOR.decode(uintDecompressed) {
+            let byteArray = [UInt8](decompressedData)
+            if let cborDecodedData = try? CBOR.decode(byteArray) {
                 if let cborDecodedDataJsonDictionary = cborDecodedData.converToJsonCompatibleFormat() as? [String: Any], JSONSerialization.isValidJSONObject(cborDecodedDataJsonDictionary) {
                     let jsonData = try JSONSerialization.data(
                         withJSONObject: cborDecodedDataJsonDictionary,
@@ -51,16 +50,16 @@ public class PixelPass {
         
             if let jsonDataToVerify = input.data(using: .utf8), let jsonData = try? JSONSerialization.jsonObject(with: jsonDataToVerify) {
                 let cborEncodableData = convertToCBOREncodableFormat(input: jsonData)
-                let dataToCompress = cborEncodableData.encode()
+                let cborEncodedData = cborEncodableData.encode()
 
-                guard Zlib().compress(data:dataToCompress,algorithm:COMPRESSION_ZLIB) != nil
+                guard Zlib().compress(data:cborEncodedData,algorithm:COMPRESSION_ZLIB) != nil
                         else {
                             os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
                             return nil
                         }
                 
-                compressedData = Zlib().compress(data: dataToCompress, algorithm:COMPRESSION_ZLIB)!
-                let uintarray  = [UInt8](compressedData)
+                compressedData = Zlib().compress(data: cborEncodedData, algorithm:COMPRESSION_ZLIB)!
+                
             } else {
                 os_log("Data is not a valid JSON",log: OSLog.default,type: OSLogType.error)
                 
