@@ -18,8 +18,8 @@ public class PixelPass {
                 os_log("Error decompressing data",log: OSLog.default,type: OSLogType.error)
                 return nil
             }
-            let byteArray = String(data:decompressedData,encoding: .ascii)?.hexaBytes
-            if let cborDecodedData = try? CBOR.decode(byteArray!) {
+            let byteArray = [UInt8](decompressedData)
+            if let cborDecodedData = try? CBOR.decode(byteArray) {
                 if let cborDecodedDataJsonDictionary = cborDecodedData.converToJsonCompatibleFormat() as? [String: Any], JSONSerialization.isValidJSONObject(cborDecodedDataJsonDictionary) {
                     let jsonData = try JSONSerialization.data(
                         withJSONObject: cborDecodedDataJsonDictionary,
@@ -40,21 +40,38 @@ public class PixelPass {
     
     
     public func generateQRData(_ input: String) -> String? {
-        if(input.elementsEqual(""))
-        {
-            return nil;
-        }
-        guard Zlib().compress(data:input,algorithm:COMPRESSION_ZLIB) != nil
-        else {
-            os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
+        
+        var compressedData: Data
+        var base45EncodedString: String = ""
+        
+        guard !input.isEmpty else {
             return nil
         }
-        let compressedData =  Zlib().compress(data:input,algorithm:COMPRESSION_ZLIB)
-        guard let base45EncodedString = compressedData?.toBase45()
-        else{
-            os_log("Encoding error",log: OSLog.default,type: OSLogType.error)
-            return nil;
-        }
+        
+            if let jsonDataToVerify = input.data(using: .utf8), let jsonData = try? JSONSerialization.jsonObject(with: jsonDataToVerify) {
+                let cborEncodableData = convertToCBOREncodableFormat(input: jsonData)
+                let cborEncodedData = cborEncodableData.encode()
+
+                guard Zlib().compress(data:cborEncodedData,algorithm:COMPRESSION_ZLIB) != nil
+                        else {
+                            os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
+                            return nil
+                        }
+                
+                compressedData = Zlib().compress(data: cborEncodedData, algorithm:COMPRESSION_ZLIB)!
+                
+            } else {
+                os_log("Data is not a valid JSON",log: OSLog.default,type: OSLogType.error)
+                
+                guard Zlib().compress(data:input,algorithm:COMPRESSION_ZLIB) != nil
+                        else {
+                            os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
+                            return nil
+                        }
+                
+                compressedData = Zlib().compress(data: input, algorithm:COMPRESSION_ZLIB)!
+            }
+        base45EncodedString = compressedData.toBase45()
         return base45EncodedString
     }
     

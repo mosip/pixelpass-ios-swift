@@ -23,8 +23,19 @@ class Zlib {
         return result
     }
 
-    func compress(data: String, algorithm: compression_algorithm = COMPRESSION_ZLIB) -> Data? {
-        var sourceBuffer = Array(data.utf8)
+    func compress(data: Any, algorithm: compression_algorithm = COMPRESSION_ZLIB) -> Data? {
+        var sourceBuffer: [UInt8]
+
+        if let stringData = data as? String {
+                sourceBuffer = Array(stringData.utf8)
+            } else {
+                if let byteArrayData = data as? [UInt8] {
+                    sourceBuffer = byteArrayData
+                } else {
+                    return nil
+                }
+            }
+                
         let destinationBufferSize = sourceBuffer.count + (sourceBuffer.count / Constants.compressionRatioDenominator) + Constants.compressionOverhead
         let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: destinationBufferSize)
         defer {

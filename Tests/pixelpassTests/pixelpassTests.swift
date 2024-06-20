@@ -75,12 +75,30 @@ class PixelPassTests: XCTestCase {
     }
     
     func testDecodeValidInputCBOR() {
-        let inputString = "NCFHPE/Q6:96+963Y6:96P563H0 %2DH0"
+        let inputString = "V7F3QBXJA5NJRCOC004 QN4"
         let decodedData = pixelPass.decode(data: inputString)
-        
         let expectedDecodedString="{\"temp\":15}"
         XCTAssertNotNil(decodedData, "Decoding should succeed for valid encoded input.")
         let decodedString = String(data: decodedData!, encoding: .utf8)
         XCTAssertEqual(decodedString, expectedDecodedString, "The decoded string should match the expected decoded string.")
     }
+    
+    func testEncodeValidInputCBOR() {
+        let inputString = "{\"temp\":15}"
+        let encoded = pixelPass.generateQRData(inputString)
+        let expectedEncodedString = "V7F3QBXJA5NJRCOC004 QN4"
+        XCTAssertNotNil(encoded!, "The encoded output should not be nil for standard input.")
+        XCTAssertTrue(encoded!.count > 0, "The encoded string should have length greater than zero.")
+        XCTAssertEqual(encoded,expectedEncodedString, "Encoded string should be same as expected encoded string")
+    }
+    
+    func testEncodeAndDecodeInputCBOR() {
+        let inputString = "{\"temp\":123}],\"bool\":true,\"arryF\":[1,2.5,3,-4,\"hello\",{\"temp\":123}],\"arryE\":[]}"
+        let encoded = pixelPass.generateQRData(inputString)!
+        let decoded = pixelPass.decode(data: encoded)
+        let decodedString = String(data: decoded!, encoding: .utf8)
+        XCTAssertNotNil(decodedString, "Decoding should succeed for valid encoded input.")
+        XCTAssertEqual(inputString,decodedString, "Decoded string should be same as expected input string")
+    }
+    
 }
