@@ -2,6 +2,22 @@ import Foundation
 import SwiftCBOR
 import OSLog
 
+extension Data {
+    init?(hexString: String) {
+        let hexString = hexString.hasPrefix("0x") || hexString.hasPrefix("0X") ? String(hexString.dropFirst(2)) : hexString
+        guard hexString.count % 2 == 0 else { return nil }
+        
+        var data = Data(capacity: hexString.count / 2)
+        for i in stride(from: 0, to: hexString.count, by: 2) {
+            let byteString = hexString.index(hexString.startIndex, offsetBy: i)..<hexString.index(hexString.startIndex, offsetBy: i+2)
+            guard let byte = UInt8(hexString[byteString], radix: 16) else { return nil }
+            data.append(byte)
+        }
+        
+        self = data
+    }
+}
+
 extension CBOR {
     func converToJsonCompatibleFormat() -> Any {
         switch self {
@@ -12,11 +28,19 @@ extension CBOR {
         case .map(let map):
             var dict = [String: Any]()
             for (key, value) in map {
-                if case let .utf8String(keyString) = key {
-                    dict[keyString] = value.converToJsonCompatibleFormat()
-                } else {
-                    os_log("Non-string key encountered, which is not supported in JSON: %{PUBLIC}@", log: OSLog.default, type: .error, String(describing: key))
+                let keyString: String
+                switch key {
+                case let .utf8String(s):
+                    keyString = s
+                case let .unsignedInt(unsignedInt):
+                    keyString = String(unsignedInt)
+                case let .double(double):
+                    keyString = String(double)
+                default:
+                    keyString = String(describing: key)
+                    os_log("Non-standard key type encountered, converting to string: %{PUBLIC}@", log: OSLog.default, type: .error, keyString)
                 }
+                dict[keyString] = value.converToJsonCompatibleFormat()
             }
             return dict
         case .utf8String(let string):
@@ -44,7 +68,7 @@ func convertToCBOREncodableFormat(input: Any) -> CBOR? {
         return .array(array.compactMap { convertToCBOREncodableFormat(input: $0) })
 
     case let dict as [String: Any]:
-           var map = [CBOR: CBOR]()
+        var map = [CBOR: CBOR]()
         for (key, value) in dict {
             if let keyCbor = convertToCBOREncodableFormat(input: key),
                let valueCbor = convertToCBOREncodableFormat(input: value) {
@@ -64,16 +88,16 @@ func convertToCBOREncodableFormat(input: Any) -> CBOR? {
         
     case let unsignedInt as UInt64:
         return .unsignedInt(unsignedInt)
-    
+        
     case let bool as Bool:
         return .boolean(bool)
         
     case let double as Double:
         return .double(double)
-
+        
     case is NSNull:
         return .null
-
+        
     default:
         os_log("Unhandled or non-encodable JSON type encountered: %{PUBLIC}@", log: OSLog.default, type: .error, String(describing: input))
         return nil

@@ -1,0 +1,16 @@
+fileignoreconfig:
+- filename: Package.resolved
+  checksum: ccf0a8fc59b40170cf1258426b240db22c704e95b75324b476310f09db22d62c
+- filename: .swiftpm/xcode/package.xcworkspace/xcuserdata/abhishekpaul.xcuserdatad/UserInterfaceState.xcuserstate
+  checksum: 7e51c19fe67fea8b1eb8311571c8fd64eee96b22410d43d133463d02564f3d13
+- filename: .swiftpm/xcode/xcuserdata/abhishekpaul.xcuserdatad/xcschemes/xcschememanagement.plist
+  checksum: cb96c9bac8243460c63f291e88f0f30e1a81b58c1ef962bc726087f8257cf67c
+- filename: README.md
+  checksum: 44c4c87f91c1c63eba9b286b62e036954870d6bca2913dc2e67b404a8442b512
+- filename: Tests/pixelpassTests/pixelpassTests.swift
+  checksum: ecdc404b6bf6303ccb3133e2f71759f88f338e94af6ca65dd4cacc538ff68b23
+- filename: Sources/pixelpass/Cbor.swift
+  checksum: b321e4f4431923a8cd7fb89e676262490dad861a28d3b929760be290db8b727f
+- filename: Sources/pixelpass/pixelpass.swift
+  checksum: 0c82e29f252169edb25b5af34d28cb2eb1bc72dc004e8b5d12bdac5180ba776e
+version: ""

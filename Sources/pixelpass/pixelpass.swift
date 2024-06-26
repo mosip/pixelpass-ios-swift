@@ -38,7 +38,6 @@ public class PixelPass {
         }
     }
     
-    
     public func generateQRData(_ input: String) -> String? {
         
         var compressedData: Data
@@ -48,29 +47,29 @@ public class PixelPass {
             return nil
         }
         
-            if let jsonDataToVerify = input.data(using: .utf8), let jsonData = try? JSONSerialization.jsonObject(with: jsonDataToVerify) {
-                let cborEncodableData = convertToCBOREncodableFormat(input: jsonData)
-                let cborEncodedData = cborEncodableData.encode()
-
-                guard Zlib().compress(data:cborEncodedData,algorithm:COMPRESSION_ZLIB) != nil
-                        else {
-                            os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
-                            return nil
-                        }
-                
-                compressedData = Zlib().compress(data: cborEncodedData, algorithm:COMPRESSION_ZLIB)!
-                
-            } else {
-                os_log("Data is not a valid JSON",log: OSLog.default,type: OSLogType.error)
-                
-                guard Zlib().compress(data:input,algorithm:COMPRESSION_ZLIB) != nil
-                        else {
-                            os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
-                            return nil
-                        }
-                
-                compressedData = Zlib().compress(data: input, algorithm:COMPRESSION_ZLIB)!
+        if let jsonDataToVerify = input.data(using: .utf8), let jsonData = try? JSONSerialization.jsonObject(with: jsonDataToVerify) {
+            let cborEncodableData = convertToCBOREncodableFormat(input: jsonData)
+            let cborEncodedData = cborEncodableData.encode()
+            
+            guard Zlib().compress(data:cborEncodedData,algorithm:COMPRESSION_ZLIB) != nil
+            else {
+                os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
+                return nil
             }
+            
+            compressedData = Zlib().compress(data: cborEncodedData, algorithm:COMPRESSION_ZLIB)!
+            
+        } else {
+            os_log("Data is not a valid JSON",log: OSLog.default,type: OSLogType.error)
+            
+            guard Zlib().compress(data:input,algorithm:COMPRESSION_ZLIB) != nil
+            else {
+                os_log("Error compressing data",log: OSLog.default,type: OSLogType.error)
+                return nil
+            }
+            
+            compressedData = Zlib().compress(data: input, algorithm:COMPRESSION_ZLIB)!
+        }
         base45EncodedString = compressedData.toBase45()
         return base45EncodedString
     }
@@ -100,8 +99,48 @@ public class PixelPass {
         return nil
     }
     
+    public func getMappedCborData(jsonData: [String:String], mapper: [String:String]) -> [UInt8] {
+        var payload = [String: String]()
+        for (param, value) in jsonData {
+            let key = mapper[param] ?? param
+            payload[key] = value
+        }
+        let cborEncodableData = convertToCBOREncodableFormat(input: payload)
+        return cborEncodableData.encode()
+    }
     
+    public func decodeMappedCborData(cborEncodedString: String, mapper: [String: String]) -> [String: String]? {
+        do {
+            let data = [UInt8](Data(hexString: cborEncodedString)!)
+            let cborDecodedData = try? CBOR.decode(data)
+            let cborDecodedDataJsonDictionary = cborDecodedData?.converToJsonCompatibleFormat()
+            
+            let jsonData = try JSONSerialization.data(
+                withJSONObject: cborDecodedDataJsonDictionary!,
+                options: [.withoutEscapingSlashes]
+            )
+            return translateToJSON(jsonData: jsonData, mapper: mapper)
+        } catch {
+            os_log("Error: %{PUBLIC}@", log: OSLog.default, type: .error, error.localizedDescription)
+            return nil
+        }
+    }
+    
+    func translateToJSON(jsonData: Data, mapper: [String: String]) -> [String: String] {
+        do {
+            guard let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] else {
+                return [:]
+            }
+            var result = [String: String]()
+            for (key, value) in jsonObject {
+                let mappedKey = mapper[key] ?? key
+                result[mappedKey] = value as? String
+            }
+            return result
+        } catch {
+            print("Error decoding JSON data: \(error)")
+            return [:]
+        }
+    }
 }
 #endif
-
-
