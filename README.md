@@ -79,4 +79,47 @@ if let decodedData = pixelPass.decode("EncodedStringHere") {
 }
 ```
 
+### `getMappedCborData(jsonData: [String:String], mapper: [String:String]) -> [UInt8]`
+
+Maps the given JSON data with mapper provided and encodeds to CBOR.
+
+**Parameters:**
+- `jsonData`: The JSON data to be mapped with mapper and encoded to CBOR.
+- `mapper`: The MAP of replacement keys for JSON to re-map the given JSON keys.
+
+**Returns:**
+- The CBOR encoded HEX array as a `[UInt8]` object.
+
+**Example Usage:**
+
+```swift
+let pixelPass = PixelPass()
+let jsonData = ["id": "207"]
+let mapper = ["id": "1"]
+let cborEncodedData = pixelPass.getMappedCborData(jsonData: jsonData,mapper: mapper).toHexString()
+print(String(data: cborEncodedData, encoding: .utf8))
+```
+
+
+### `decodeMappedCborData(cborEncodedString: String, mapper: [String: String]) -> [String: String]?`
+
+Decodes the given string data from CBOR and re-maps with mapper provided.
+
+**Parameters:**
+- `cborEncodedString`: The CBOR endoded string data to be decoded.
+- `mapper`: The MAP of replacement keys for JSON to re-map the given JSON keys.
+
+**Returns:**
+- The JSON data as a `[String: String]?` object, or `nil` if an error occurs.
+
+**Example Usage:**
+
+```swift
+let pixelPass = PixelPass()
+let mapper = ["1": "id", "2": "name", "3": "l_name"]
+let data = "a302644a686f6e01633230370365486f6e6179"
+if let decodedData = pixelPass.decodeMappedCborData(cborEncodedString: data, mapper: mapper) {
+    print(String(data: decodedData, encoding: .utf8) ?? "Failed to decode.")
+}
+```
 
