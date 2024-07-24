@@ -6,6 +6,14 @@ import SwiftCBOR
 import OSLog
 #if canImport(UIKit)
 import UIKit
+
+extension Array where Element == UInt8 {
+    func toHexString() -> String {
+        return self.map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+
 public class PixelPass {
     public init()
     {
@@ -99,27 +107,39 @@ public class PixelPass {
         return nil
     }
     
-    public func getMappedCborData(jsonData: [String:String], mapper: [String:String]) -> [UInt8] {
-        var payload = [String: String]()
-        for (param, value) in jsonData {
-            let key = mapper[param] ?? param
-            payload[key] = value
-        }
-        let cborEncodableData = convertToCBOREncodableFormat(input: payload)
-        return cborEncodableData.encode()
+    public func getMappedData(stringData: String, mapper: [String:String], cborEnable : Bool = false) -> String {
+        let jsonData = stringData.data(using: .utf8)!
+        let mappedJSON = translateToJSON(jsonData: jsonData, mapper: mapper)
+        do {
+            if !cborEnable{
+                let decoded =  try JSONSerialization.data(withJSONObject: mappedJSON, options: [])
+                if let str = String(data: decoded, encoding: .utf8) {
+                    return str
+                }
+            }
+        }catch {}
+        
+        let cborEncodableData = convertToCBOREncodableFormat(input: mappedJSON)
+        return cborEncodableData.encode().toHexString()
     }
     
-    public func decodeMappedCborData(cborEncodedString: String, mapper: [String: String]) -> [String: String]? {
+    public func decodeMappedData(stringData: String, mapper: [String: String]) -> [String: String]? {
         do {
-            let data = [UInt8](Data(hexString: cborEncodedString)!)
-            let cborDecodedData = try? CBOR.decode(data)
-            let cborDecodedDataJsonDictionary = cborDecodedData?.converToJsonCompatibleFormat()
-            
-            let jsonData = try JSONSerialization.data(
-                withJSONObject: cborDecodedDataJsonDictionary!,
-                options: [.withoutEscapingSlashes]
-            )
-            return translateToJSON(jsonData: jsonData, mapper: mapper)
+            let data = [UInt8](Data(hexString: stringData) ?? Data())
+            if !data.isEmpty {
+                let cborDecodedData = try? CBOR.decode(data)
+                let cborDecodedDataJsonDictionary = cborDecodedData?.converToJsonCompatibleFormat()
+                
+                let jsonData = try JSONSerialization.data(
+                    withJSONObject: cborDecodedDataJsonDictionary!,
+                    options: [.withoutEscapingSlashes]
+                )
+                return translateToJSON(jsonData: jsonData, mapper: mapper)
+            }
+            else{
+                let jsonData = stringData.data(using: .utf8)!
+                return translateToJSON(jsonData: jsonData, mapper: mapper)
+            }
         } catch {
             os_log("Error: %{PUBLIC}@", log: OSLog.default, type: .error, error.localizedDescription)
             return nil

@@ -86,9 +86,10 @@ Maps the given JSON data with mapper provided and encodeds to CBOR.
 **Parameters:**
 - `jsonData`: The JSON data to be mapped with mapper and encoded to CBOR.
 - `mapper`: The MAP of replacement keys for JSON to re-map the given JSON keys.
+- `cborEnable`: The flag to enable CBOR encoding. Defaults to false.
 
 **Returns:**
-- The CBOR encoded HEX array as a `[UInt8]` object.
+- The CBOR encoded HEX array as a `[UInt8]` object if cborEnable set to be true. Else returns just the re-maped JSON string.
 
 **Example Usage:**
 
@@ -103,7 +104,7 @@ print(String(data: cborEncodedData, encoding: .utf8))
 
 ### `decodeMappedCborData(cborEncodedString: String, mapper: [String: String]) -> [String: String]?`
 
-Decodes the given string data from CBOR and re-maps with mapper provided.
+Decodes the given string data from CBOR if its CBOR encoded and re-maps with mapper provided.
 
 **Parameters:**
 - `cborEncodedString`: The CBOR endoded string data to be decoded.
