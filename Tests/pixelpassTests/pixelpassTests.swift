@@ -1,12 +1,6 @@
 import XCTest
 @testable import pixelpass
 
-extension Array where Element == UInt8 {
-    func toHexString() -> String {
-        return self.map { String(format: "%02x", $0) }.joined()
-    }
-}
-
 class PixelPassTests: XCTestCase {
     var pixelPass: PixelPass!
     
@@ -108,24 +102,39 @@ class PixelPassTests: XCTestCase {
     }
     
     func testJsonMappedCBOREncode() {
-        let jsonData = ["id": "207"]
+        let jsonData = "{\"id\": \"207\"}"
         let mapper = ["id": "1"]
         let expectedCborEncodedString = "a1613163323037"
-        let cborEncodedData = pixelPass.getMappedCborData(jsonData: jsonData,mapper: mapper).toHexString()
-        
-        let expectedDecodedData = ["1":"207"]
-        let decodedCborData = pixelPass.decodeMappedCborData(cborEncodedString: expectedCborEncodedString, mapper: mapper)
+        let cborEncodedData = pixelPass.getMappedData(stringData: jsonData,mapper: mapper,cborEnable: true)
         
         XCTAssertNotNil(cborEncodedData, "JSON mapping should succeed for valid input.")
         XCTAssertEqual(cborEncodedData,expectedCborEncodedString, "Encoded string should be same as expected string")
-        XCTAssertEqual(expectedDecodedData,decodedCborData, "Encoded string should be same as expected string")
+    }
+    
+    func testJsonMappedEncode() {
+        let jsonData = "{\"id\": \"207\"}"
+        let mapper = ["id": "1"]
+        let expectedMappedData = "{\"1\":\"207\"}"
+        let mappedData = pixelPass.getMappedData(stringData: jsonData,mapper: mapper)
+
+        XCTAssertNotNil(mappedData, "JSON mapping should succeed for valid input.")
+        XCTAssertEqual(mappedData,expectedMappedData, "Encoded string should be same as expected string")
     }
     
     func testJsonMappedCBORDecode() {
         let expected = ["id": "207", "name": "Jhon", "l_name": "Honay"]
         let mapper = ["1": "id", "2": "name", "3": "l_name"]
         let data = "a302644a686f6e01633230370365486f6e6179"
-        let jsonData = pixelPass.decodeMappedCborData(cborEncodedString: data, mapper: mapper)
+        let jsonData = pixelPass.decodeMappedData(stringData: data, mapper: mapper)
+        XCTAssertNotNil(jsonData, "JSON mapping should succeed for valid input.")
+        XCTAssertEqual(jsonData,expected, "Decoded JSON should be same as expected JSON")
+    }
+    
+    func testJsonMappedDecode() {
+        let expected = ["id": "207", "name": "Jhon", "l_name": "Honay"]
+        let mapper = ["1": "id", "2": "name", "3": "l_name"]
+        let data = "{\"1\": \"207\", \"2\": \"Jhon\", \"3\": \"Honay\"}"
+        let jsonData = pixelPass.decodeMappedData(stringData: data, mapper: mapper)
         XCTAssertNotNil(jsonData, "JSON mapping should succeed for valid input.")
         XCTAssertEqual(jsonData,expected, "Decoded JSON should be same as expected JSON")
     }
