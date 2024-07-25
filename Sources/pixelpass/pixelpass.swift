@@ -117,7 +117,10 @@ public class PixelPass {
                     return str
                 }
             }
-        }catch {}
+        }catch {
+            os_log("Error: %{PUBLIC}@", log: OSLog.default, type: .error, error.localizedDescription)
+            return ""
+        }
         
         let cborEncodableData = convertToCBOREncodableFormat(input: mappedJSON)
         return cborEncodableData.encode().toHexString()
