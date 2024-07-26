@@ -78,5 +78,3 @@ if let decodedData = pixelPass.decode("EncodedStringHere") {
     print(String(data: decodedData, encoding: .utf8) ?? "Failed to decode.")
 }
 ```
-
-
