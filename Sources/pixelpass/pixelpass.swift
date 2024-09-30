@@ -4,6 +4,7 @@ import CoreImage
 import Compression
 import SwiftCBOR
 import OSLog
+import ZIPFoundation
 #if canImport(UIKit)
 import UIKit
 
@@ -19,6 +20,30 @@ public class PixelPass {
     {
         
     }
+    
+    public func decodeBinary(data: [UInt8]) throws -> String? {
+        clearTemporaryDirectory()
+        
+        let encodedData = Data(data)
+        guard String(decoding: encodedData, as: UTF8.self).hasPrefix(Constants.zipHeader) else {
+            throw decodeByteArrayError.UnknownBinaryFileTypeException
+        }
+
+        let tempZipFileURL = FileManager.default.temporaryDirectory.appendingPathComponent("temp.zip")
+        try encodedData.write(to: tempZipFileURL)
+
+        guard let archive = Archive(url: tempZipFileURL, accessMode: .read),
+              let entry = archive[Constants.defaultZipFileName] else {
+            os_log("Error accessing zip file or missing entry", log: OSLog.default, type: .error)
+            return nil
+        }
+
+        var extractedData = Data()
+        let _ = try archive.extract(entry) { extractedData.append($0) }
+
+        return String(data: extractedData, encoding: .utf8)
+    }
+
     public func decode(data: String) -> Data? {
         do {
             let base45DecodedData = try data.fromBase45()

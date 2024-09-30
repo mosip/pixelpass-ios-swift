@@ -79,6 +79,18 @@ if let decodedData = pixelPass.decode("EncodedStringHere") {
 }
 ```
 
+### `decode(data: [UInt8]) -> String?`
+
+- `data` - The ByteArray of the zip file.
+
+```swift
+let pixelPass = PixelPass()
+if let decodedData = pixelPass.decode(<[UInt8]-of-zip>) {
+    print(String(data: decodedData, encoding: .utf8))
+}
+```
+The `decode` will take a `UInt8ByteArray`  as parameter and gives us unzipped string. Currently only zip binary data is only supported.
+
 ### `getMappedCborData(jsonData: [String:String], mapper: [String:String]) -> [UInt8]`
 
 Maps the given JSON data with mapper provided and encodeds to CBOR.

@@ -1,4 +1,5 @@
 import XCTest
+import Foundation
 @testable import pixelpass
 
 class PixelPassTests: XCTestCase {
@@ -137,5 +138,48 @@ class PixelPassTests: XCTestCase {
         let jsonData = pixelPass.decodeMappedData(stringData: data, mapper: mapper)
         XCTAssertNotNil(jsonData, "JSON mapping should succeed for valid input.")
         XCTAssertEqual(jsonData,expected, "Decoded JSON should be same as expected JSON")
+    }
+    
+    func testByteArrayValidInput() {
+        
+        clearTemporaryDirectory()
+        
+        let fileManager = FileManager.default
+        let tempdir = FileManager.default.temporaryDirectory
+        let inputString = "Hello, World!"
+        let fileURL = tempdir.appendingPathComponent("certificate.json")
+        let zipURL = tempdir.appendingPathComponent("temp.zip")
+        
+        var decodedString = ""
+        do {
+            try inputString.write(to: fileURL, atomically: true, encoding: .utf8)
+            try fileManager.zipItem(at: fileURL, to: zipURL)
+            let fileData = try Data(contentsOf: zipURL)
+            let byetArray = [UInt8](fileData)
+            decodedString = try pixelPass.decodeBinary(data: byetArray)!
+        } catch {
+            print(error)
+        }
+        XCTAssertNotNil(decodedString, "The decoded string should not be empty.")
+        XCTAssertEqual(inputString, decodedString, "The decoded string should match the expected decoded string.")
+    }
+    
+    func testByteArrayInvalidInput() {
+        
+        clearTemporaryDirectory()
+        
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let tempTxtFileURL = tempDirectory.appendingPathComponent("temp.txt")
+        let content = "This is a test text file."
+        
+        do {
+            try content.write(to: tempTxtFileURL, atomically: true, encoding: .utf8)
+            let fileData = try Data(contentsOf: tempTxtFileURL)
+            XCTAssertThrowsError(try PixelPass().decodeBinary(data: [UInt8](fileData))) { error in
+                XCTAssertEqual(error as? decodeByteArrayError, decodeByteArrayError.UnknownBinaryFileTypeException)
+            }
+        } catch {
+            XCTFail("Error reading text file: \(error)")
+        }
     }
 }

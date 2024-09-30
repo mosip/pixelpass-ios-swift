@@ -10,4 +10,7 @@ import Foundation
      static let compressionRatioDenominator = 1000
     
      static let adlerBase: UInt32 = 65521
+     
+     static let zipHeader = "PK"
+     static let defaultZipFileName = "certificate.json"
 }
