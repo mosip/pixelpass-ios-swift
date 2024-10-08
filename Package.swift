@@ -20,6 +20,7 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/ehn-dcc-development/base45-swift", .upToNextMajor(from: "1.1.0")),
         .package(url: "https://github.com/valpackett/SwiftCBOR", branch: "master"),
+        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMajor(from: "0.9.0"))
         
     ],
     targets: [
@@ -27,7 +28,7 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "pixelpass",
-            dependencies: ["base45-swift","SwiftCBOR"]),
+            dependencies: ["base45-swift","SwiftCBOR","ZIPFoundation"]),
         .testTarget(
             name: "pixelpassTests",
             dependencies: ["pixelpass"]
