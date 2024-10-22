@@ -2,24 +2,8 @@ import Foundation
 import SwiftCBOR
 import OSLog
 
-extension Data {
-    init?(hexString: String) {
-        let hexString = hexString.hasPrefix("0x") || hexString.hasPrefix("0X") ? String(hexString.dropFirst(2)) : hexString
-        guard hexString.count % 2 == 0 else { return nil }
-        
-        var data = Data(capacity: hexString.count / 2)
-        for i in stride(from: 0, to: hexString.count, by: 2) {
-            let byteString = hexString.index(hexString.startIndex, offsetBy: i)..<hexString.index(hexString.startIndex, offsetBy: i+2)
-            guard let byte = UInt8(hexString[byteString], radix: 16) else { return nil }
-            data.append(byte)
-        }
-        
-        self = data
-    }
-}
-
 extension CBOR {
-    func converToJsonCompatibleFormat() -> Any {
+func converToJsonCompatibleFormat() -> Any {
         switch self {
         case .array(let array):
             return array.map {
@@ -46,7 +30,16 @@ extension CBOR {
         case .utf8String(let string):
             return string
         case .byteString(let data):
-            return Data(data).base64EncodedString()
+            do {
+                let decodedCBORIn = try CBOR.decode(data)
+                
+                if(decodedCBORIn==nil){
+                    return String(decoding: data, as: UTF8.self)
+                }
+                return decodedCBORIn!.converToJsonCompatibleFormat()
+            } catch {
+                return String(decoding: data, as: UTF8.self)
+            }
         case .boolean(let bool):
             return bool
         case .double(let double):
@@ -55,6 +48,8 @@ extension CBOR {
             return unsignedInt
         case .null:
             return NSNull()
+        case .tagged(_, let taggedValue):
+            return taggedValue.converToJsonCompatibleFormat()
         default:
             os_log("Unhandled or non-JSON-compatible CBOR type encountered: %{PUBLIC}@", log: OSLog.default, type: .error, String(describing: self))
             return NSNull()

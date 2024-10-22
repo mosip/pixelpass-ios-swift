@@ -190,5 +190,29 @@ public class PixelPass {
             return [:]
         }
     }
+    public func toJson(base64UrlEncodedCborEncodedString:String) throws -> [String: Any] {
+        do{
+            guard let decodedBase64Data = Data(base64EncodedURLSafe: base64UrlEncodedCborEncodedString) else {
+                os_log("Invalid base64 URL string provided",log: OSLog.default, type: .error)
+                throw decodeByteArrayError.customError(description: "Error while base64 url decoding the data")
+            }
+            
+            let inputToCBORDecode = Array(decodedBase64Data)
+            if let cborDecodedData = try? CBOR.decode(inputToCBORDecode) {
+                if let cborDecodedDataJsonDictionary = cborDecodedData.converToJsonCompatibleFormat() as? [String: Any], JSONSerialization.isValidJSONObject(cborDecodedDataJsonDictionary) {
+                    return cborDecodedDataJsonDictionary
+                } else {
+                    os_log("Decoded CBOR data is not a valid JSON object",log: .default,type: .error)
+                    throw decodeError.customError(description: "CBOR data is not a valid JSON object")            }
+            } else {
+                os_log("Error while CBOR decoding the data",log: .default,type: .error)
+                throw decodeError.customError(description: "CBOR decoding failed")
+            }
+        }
+        catch let error {
+            os_log("error occurred while parsing  data - %{PUBLIC}@",log: .default, type: .error, error.localizedDescription)
+            throw decodeByteArrayError.customError(description: "error occurred while parsing  data - \(error.localizedDescription)")
+        }
+    }
 }
 #endif
