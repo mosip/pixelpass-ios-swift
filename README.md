@@ -8,6 +8,7 @@ PixelPass is a Swift library designed for encoding, decoding, and generating QR 
 - **Base45 Encoding/Decoding**: Encode and decode strings using Base45.
 - **Zlib Compression/Decompression**: Compress and decompress data efficiently.
 - **QR Code Generation**: Create QR codes from strings with customizable error correction levels.
+- Convert CBOR encoded base64Url string to JSON
 
 ## Installation
 
@@ -136,3 +137,26 @@ if let decodedData = pixelPass.decodeMappedCborData(cborEncodedString: data, map
 }
 ```
 
+###  `toJson(base64UrlEncodedCborEncodedString)`
+
+converts the provided encoded CBOR in base64 encoded format to JSON format
+
+**Parameters:**
+- `base64UrlEncodedCborEncodedString` - base64url-encoded representation of the CBOR-encoded data
+
+**Returns:**
+- decoded data in JSON format
+
+**Example Usage:**
+
+```swift
+let pixelPass = PixelPass()
+do {
+    let data = "omd2ZXJzaW9uYzEuMGRkYXRhgaJiazFidjFiazKiZGsyLjGhZmsyLjEuMYHYGEmhZmsyLjEuMQFkazIuMoRDoQEmoRghWQFjMIIBXzCCAQSgAwIBAgIGAYwpA4_aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNfd1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMxMjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdvMUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQw7367PjIwU17ckX_G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc33RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEAo4TsuxDl5-3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOOrwnEYRBmmfhaPor2OZCrbP3U69gYWLulZmsyLjIuMWMxLjBmazIuMi4yZnYyLjIuMmZrMi4yLjOhdmNvbS5leGFtcGxlLm5hbWVzcGFjZTGhAVggChSiDWMcNBzAxM6I-CuUe0P15BIwt06OIiNYkNyITxRmazIuMi40ZnYyLjIuNGZrMi4yLjWjYWHAdDIwMjMtMTItMDRUMTI6NDk6NDFaYWLAdDIwMjMtMTItMDRUMTI6NDk6NDFaYWPAdDIwMzMtMTItMDRUMTI6NDk6NDFaWEAE6jL7xUnhRbxd1LNq9xBA8G_RXGqFhc1GlKASbsfu7Mk-UJZzPvHis7zMRfYl2GNNgiTN-zbjFX_5IDdLi0jr"
+    let decodedData = try pixelPass.toJson(base64UrlEncodedCborEncodedString: data)
+
+    print(decodedData)
+} catch {
+    print("error occurred while decoding \(error.localizedDescription)")
+}
+```
