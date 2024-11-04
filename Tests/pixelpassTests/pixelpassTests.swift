@@ -182,4 +182,35 @@ class PixelPassTests: XCTestCase {
             XCTFail("Error reading text file: \(error)")
         }
     }
+    
+    func testBase64EncodedCborDataToJsonConversionSuccess() {
+        do {
+            let data = "omd2ZXJzaW9uYzEuMGRkYXRhgaJiazFidjFiazKiZGsyLjGhZmsyLjEuMYHYGEmhZmsyLjEuMQFkazIuMoRDoQEmoRghWQFjMIIBXzCCAQSgAwIBAgIGAYwpA4_aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNfd1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMxMjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdvMUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQw7367PjIwU17ckX_G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc33RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEAo4TsuxDl5-3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOOrwnEYRBmmfhaPor2OZCrbP3U69gYWLulZmsyLjIuMWMxLjBmazIuMi4yZnYyLjIuMmZrMi4yLjOhdmNvbS5leGFtcGxlLm5hbWVzcGFjZTGhAVggChSiDWMcNBzAxM6I-CuUe0P15BIwt06OIiNYkNyITxRmazIuMi40ZnYyLjIuNGZrMi4yLjWjYWHAdDIwMjMtMTItMDRUMTI6NDk6NDFaYWLAdDIwMjMtMTItMDRUMTI6NDk6NDFaYWPAdDIwMzMtMTItMDRUMTI6NDk6NDFaWEAE6jL7xUnhRbxd1LNq9xBA8G_RXGqFhc1GlKASbsfu7Mk-UJZzPvHis7zMRfYl2GNNgiTN-zbjFX_5IDdLi0jr"
+            let jsonData = try pixelPass.toJson(base64UrlEncodedCborEncodedString: data)
+            let expectedData: [String: Any] = ["data": [["k1": "v1", "k2": ["k2.1": ["k2.1.1": [["k2.1.1": 1]]], "k2.2": [["1": NSNull()], ["33": NSNull()], ["k2.2.4": "v2.2.4", "k2.2.3": ["com.example.namespace1": ["1": 10]], "k2.2.5": ["c": "2033-12-04T12:49:41Z", "b": "2023-12-04T12:49:41Z", "a": "2023-12-04T12:49:41Z"], "k2.2.1": "1.0", "k2.2.2": "v2.2.2"], 4]]]], "version": "1.0"]
+            
+            XCTAssertEqualDictionaries(expectedData, jsonData)
+        } catch let error {
+            XCTFail()
+        }
+    }
+    
+    func testBase64EncodedCborDataToJsonConversionThrowsErrorWhenDecodingFails() {
+        let data = "omd2ZXJzaW9uYzEuMGRkYXRhgaJiazFidjFiazKiZGsyLjGhZmsyLjEuMYHYGEmhZmsyLjEuMQFkazIuMoRDoQEmoRghWQFjMIIBXzCCAQSgAwIBAgIGAYwpA4_aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNfd1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMxMjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdvMUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQw7367PjIwU17ckX_G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc33RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEAo4TsuxDl5-3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOOrwnEYRBmmfhaPor2OZCrbP3U69gYWK2lZmsyLjIuMWMxLjBmazIuMi4yZnYyLjIuMmZrMi4yLjOhaGsyLjIuMy4xoQFYIAoUog1jHDQcwMTOiPgrlHtD9eQSMLdOjiIjWJDciE8UZmsyLjIuNGZ2Mi4yLjRmazIuMi41o2FhwHQyMDIzLTEyLTA0VDEyOjQ5OjQxWmFiwHQyMDIzLTEyLTA0VDEyOjQ5OjQxWmFjwHQyMDMzLTEyLTA0VDEyOjQ5OjQxWlhABOoy-8VJ4UW8XdSzavcQQPBv0VxqhYXNRpSgEm7H7uzJPlCWcz7x4rO8zEX2JdhjTYIkzfs24xV_-SA3S4tI6w"
+        
+        XCTAssertThrowsError(try pixelPass.toJson(base64UrlEncodedCborEncodedString: data)) { error in
+            guard case let decodeByteArrayError.customError(message) = error else {
+                return XCTFail("Expected decodeByteArrayError.customError, but got a different error")
+            }
+            
+            XCTAssertEqual(message, "error occurred while parsing  data - The operation couldn’t be completed. (pixelpass.decodeByteArrayError error 0.)", "The error message does not match")
+        }
+    }
+}
+
+func XCTAssertEqualDictionaries(_ expected: [String: Any], _ actual: [String: Any], file: StaticString = #file, line: UInt = #line) {
+    let expectedData = try? JSONSerialization.data(withJSONObject: expected, options: [.sortedKeys])
+    let actualData = try? JSONSerialization.data(withJSONObject: actual, options: [.sortedKeys])
+    
+    XCTAssertEqual(expectedData, actualData, "The dictionaries do not match", file: file, line: line)
 }
