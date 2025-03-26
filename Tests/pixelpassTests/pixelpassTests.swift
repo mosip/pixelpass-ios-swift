@@ -66,7 +66,7 @@ class PixelPassTests: XCTestCase {
     func testGenerateQRCode() {
         let inputString = "Test QR Code generation"
         let qrCodeImage = pixelPass.generateQRCode( data: inputString,ecc: ECC.M)
-       
+        
         XCTAssertNotNil(qrCodeImage, "QR Code generation should succeed and return a non-nil UIImage.")
     }
     
@@ -117,7 +117,7 @@ class PixelPassTests: XCTestCase {
         let mapper = ["id": "1"]
         let expectedMappedData = "{\"1\":\"207\"}"
         let mappedData = pixelPass.getMappedData(stringData: jsonData,mapper: mapper)
-
+        
         XCTAssertNotNil(mappedData, "JSON mapping should succeed for valid input.")
         XCTAssertEqual(mappedData,expectedMappedData, "Encoded string should be same as expected string")
     }
@@ -176,7 +176,12 @@ class PixelPassTests: XCTestCase {
             try content.write(to: tempTxtFileURL, atomically: true, encoding: .utf8)
             let fileData = try Data(contentsOf: tempTxtFileURL)
             XCTAssertThrowsError(try PixelPass().decodeBinary(data: [UInt8](fileData))) { error in
-                XCTAssertEqual(error as? decodeByteArrayError, decodeByteArrayError.UnknownBinaryFileTypeException)
+                switch error {
+                case decodeByteArrayError.UnknownBinaryFileTypeException:
+                    XCTAssertTrue(true)
+                default:
+                    XCTFail("Unexpected error type: \(error)")
+                }
             }
         } catch {
             XCTFail("Error reading text file: \(error)")
