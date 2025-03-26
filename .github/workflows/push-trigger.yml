@@ -42,10 +42,12 @@ jobs:
         if: "${{ github.event_name != 'pull_request' && failure() }}"
 
   sonar_analysis:
-    uses: mosip/kattu/.github/workflows/swift-sonar-analysis.yml@master
+    uses: tw-mosip/kattu/.github/workflows/swift-sonar-analysis.yml@injimob-2885
     if: "${{  github.event_name != 'pull_request' }}"
     with:
       SERVICE_LOCATION: "."
+      TARGET_PLATFORM: "iOS"
+      XC_SCHEME: "pixelpassTests"
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_ORGANIZATION: ${{ secrets.ORG_KEY }}
