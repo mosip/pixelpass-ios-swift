@@ -111,9 +111,26 @@ public class PixelPass {
         var qrText = generateQRData(data)
         if qrText == nil {
             return nil
-        } else {
-            qrText! += header
         }
+        qrText! += header
+        return getPngImageData(from: qrText!, ecc: ecc)
+    }
+
+    public func generateQRCodeWithinLimit(allowedQRDataSizeLimit: Int, data: String, ecc: ECC = ECC.L, header: String = "") throws -> Data? {
+        var qrText = generateQRData(data)
+        if qrText == nil {
+            return nil
+        }
+        qrText! += header
+
+        if qrText!.count > allowedQRDataSizeLimit {
+            throw QRDataOverflowException.customError(description: QrDataOverFlowExceptionMessage)
+        }
+
+        return getPngImageData(from: qrText!, ecc: ecc)
+    }
+
+    private func getPngImageData(from qrText: String, ecc: ECC) -> Data? {
         let data = qrText?.data(using: String.Encoding.ascii)
         
         if let filter = CIFilter(name: "CIQRCodeGenerator") {

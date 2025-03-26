@@ -13,4 +13,6 @@ import Foundation
      
      static let zipHeader = "PK"
      static let defaultZipFileName = "certificate.json"
+     
+     static let QrDataOverFlowExceptionMessage = "QR data size exceeds the allowed limit"
 }

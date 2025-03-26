@@ -40,6 +40,29 @@ if let qrCodeData = pixelPass.generateQRCode(data: "Hello, World!", ecc: .M, hea
     // Use qrCodeData in your application (e.g., display in an ImageView)
 }
 ```
+
+### `generateQRCodeWithinLimit(allowedQRDataSizeLimit: Int, data: String, ecc: ECC = .L, header: String = "")`
+
+Generates a QR code from the provided string. The method first compresses, then checks if compressed data is within the allowed size limit  and encodes the input string, then creates a QR code with an optional error correction level and header. The QR code is returned as PNG data.
+
+**Parameters:**
+- `allowedQRDataSizeLimit`: Size Limit for Qr Data length. If it exceeds the limit, `QrDataOverflowException` will be thrown.
+- `data`: The string to encode and generate a QR code from.
+- `ecc`: Error correction level with a default of `.L`.
+- `header`: A string prepended to the encoded data, optional.
+
+**Returns:**
+- Data representing the QR code image in PNG format, or `nil` if an error occurs.
+
+**Example Usage:**
+
+```swift
+let pixelPass = PixelPass()
+if let qrCodeData = pixelPass.generateQRCode(allowedQRDataSizeLimit: 4000, data: "Hello, World!", ecc: .M, header: "HDR") {
+    // Use qrCodeData in your application (e.g., display in an ImageView)
+}
+```
+
 ### `generateQRData(input: String) -> String?`
 
 Generates a Base45 encoded string from the provided input after compressing it using Zlib. This method handles the compression and encoding of the input string.
