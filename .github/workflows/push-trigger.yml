@@ -30,24 +30,43 @@ jobs:
         run: xcodebuild -scheme pixelpass -destination 'generic/platform=iOS' build
 
       - name: Run tests
-        run: xcodebuild test -scheme pixelpassTests -destination 'platform=iOS Simulator,OS=latest'
+        run: |
+          xcodebuild test -scheme pixelpassTests -destination 'platform=iOS Simulator,OS=latest,name=iPhone 15'
 
-      - name: Notify on Slack
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,author,commit,workflow,job 
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
-        if: "${{ github.event_name != 'pull_request' && failure() }}"
+          xcodebuild test \
+                    -scheme pixelpassTests \
+                    -destination 'platform=iOS Simulator,OS=latest,name=iPhone 15' \
+                    -enableCodeCoverage YES
 
-  sonar_analysis:
-    uses: tw-mosip/kattu/.github/workflows/swift-sonar-analysis.yml@injimob-2885
-    if: "${{  github.event_name != 'pull_request' }}"
-    with:
-      SERVICE_LOCATION: "."
-      TEST_SCHEME: "pixelpassTests"
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_ORGANIZATION: ${{ secrets.ORG_KEY }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
+          TEST_BUNDLE=$(find ~/Library/Developer/Xcode/DerivedData -type d -name "*.xctest" | head -n 1)
+
+          TEST_EXECUTABLE=$(find "$TEST_BUNDLE" -type f -perm -111 | head -n 1)
+
+          COVERAGE_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "Coverage.profdata" | head -n 1)
+
+          xcrun llvm-cov show \
+                    -instr-profile="$COVERAGE_PATH" \
+                    "$TEST_EXECUTABLE" \
+                    -format=text > coverage.report
+
+          head -n 50 coverage.report
+
+      # - name: Notify on Slack
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: ${{ job.status }}
+      #     fields: repo,message,author,commit,workflow,job 
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
+      #   if: "${{ github.event_name != 'pull_request' && failure() }}"
+
+  # sonar_analysis:
+  #   uses: tw-mosip/kattu/.github/workflows/swift-sonar-analysis.yml@injimob-2885 
+  #   if: "${{  github.event_name != 'pull_request' }}"
+  #   with:
+  #     SERVICE_LOCATION: "."
+  #     TEST_SCHEME: "pixelpassTests"
+  #   secrets:
+  #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     SONAR_ORGANIZATION: ${{ secrets.ORG_KEY }}
+  #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
