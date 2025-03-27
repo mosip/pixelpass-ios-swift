@@ -30,7 +30,7 @@ jobs:
         run: xcodebuild -scheme pixelpass -destination 'generic/platform=iOS' build
 
       - name: Run tests
-        run: xcodebuild test -scheme pixelpassTests -destination 'platform=iOS Simulator,OS=latest'
+        run: xcodebuild test -scheme pixelpassTests -destination 'platform=iOS Simulator,OS=latest,name=iPhone 15'
 
       - name: Notify on Slack
         uses: 8398a7/action-slack@v3
@@ -42,7 +42,7 @@ jobs:
         if: "${{ github.event_name != 'pull_request' && failure() }}"
 
   sonar_analysis:
-    uses: tw-mosip/kattu/.github/workflows/swift-sonar-analysis.yml@injimob-2885
+    uses: tw-mosip/kattu/.github/workflows/swift-sonar-analysis.yml@injimob-2885 
     if: "${{  github.event_name != 'pull_request' }}"
     with:
       SERVICE_LOCATION: "."
