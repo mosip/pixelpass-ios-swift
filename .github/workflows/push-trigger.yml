@@ -30,19 +30,7 @@ jobs:
         run: xcodebuild -scheme pixelpass -destination 'generic/platform=iOS' build
 
       - name: Run tests
-        run: |
-          DEVICE_ID=$(xcrun simctl list devices available | grep -m1 'iPhone' | awk -F '[()]' '{print $2}')
-          echo "Using iOS Simulator ID: $DEVICE_ID"
-
-          xcrun simctl boot "$DEVICE_ID" || echo "Simulator already booted"
-          xcrun simctl list devices
-
-          sleep 50
-
-          xcrun xcodebuild test -scheme pixelpassTests -destination "platform=iOS Simulator,id=$DEVICE_ID" \
-           CODE_SIGNING_REQUIRED=NO \
-           CODE_SIGN_IDENTITY="" \
-           DEVELOPMENT_TEAM=""
+        run: xcodebuild test -scheme pixelpassTests -destination 'platform=iOS Simulator,OS=latest,name=iPhone 15'
 
       - name: Notify on Slack
         uses: 8398a7/action-slack@v3
@@ -58,8 +46,7 @@ jobs:
     if: "${{  github.event_name != 'pull_request' }}"
     with:
       SERVICE_LOCATION: "."
-      TARGET_PLATFORM: "iOS"
-      XC_SCHEME: "pixelpassTests"
+      TEST_SCHEME: "pixelpassTests"
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_ORGANIZATION: ${{ secrets.ORG_KEY }}
