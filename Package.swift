@@ -31,7 +31,7 @@ let package = Package(
             dependencies: ["base45-swift","SwiftCBOR","ZIPFoundation"]),
         .testTarget(
             name: "pixelpassTests",
-            dependencies: ["pixelpass"]
+            dependencies: ["pixelpass","base45-swift","ZIPFoundation"]
         ),
     ]
 )
