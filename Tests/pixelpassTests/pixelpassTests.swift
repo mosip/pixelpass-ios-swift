@@ -176,7 +176,12 @@ class PixelPassTests: XCTestCase {
             try content.write(to: tempTxtFileURL, atomically: true, encoding: .utf8)
             let fileData = try Data(contentsOf: tempTxtFileURL)
             XCTAssertThrowsError(try PixelPass().decodeBinary(data: [UInt8](fileData))) { error in
-                XCTAssertEqual(error as? decodeByteArrayError, decodeByteArrayError.UnknownBinaryFileTypeException)
+                switch error {
+                case decodeByteArrayError.UnknownBinaryFileTypeException:
+                    XCTAssertTrue(true)
+                default:
+                    XCTFail("Unexpected error type: \(error)")
+                }
             }
         } catch {
             XCTFail("Error reading text file: \(error)")
