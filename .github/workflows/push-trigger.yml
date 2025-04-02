@@ -15,7 +15,7 @@ on:
       - develop
       - feature/**
       - hotfix/**
-      - 'release-**'
+      - 'release-*'
 
 jobs:
   build-swift:
