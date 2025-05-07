@@ -190,7 +190,7 @@ public class PixelPass {
             return [:]
         }
     }
-    public func toJson(base64UrlEncodedCborEncodedString:String) throws -> [String: Any] {
+    public func toJson(base64UrlEncodedCborEncodedString:String) throws -> Any {
         do{
             guard let decodedBase64Data = Data(base64EncodedURLSafe: base64UrlEncodedCborEncodedString) else {
                 os_log("Invalid base64 URL string provided",log: OSLog.default, type: .error)
@@ -199,8 +199,8 @@ public class PixelPass {
             
             let inputToCBORDecode = Array(decodedBase64Data)
             if let cborDecodedData = try? CBOR.decode(inputToCBORDecode) {
-                if let cborDecodedDataJsonDictionary = cborDecodedData.converToJsonCompatibleFormat() as? [String: Any], JSONSerialization.isValidJSONObject(cborDecodedDataJsonDictionary) {
-                    return cborDecodedDataJsonDictionary
+                if let cborInJSON = cborDecodedData.converToJsonCompatibleFormat() as? [String: Any], JSONSerialization.isValidJSONObject(cborInJSON) {
+                    return cborInJSON
                 } else {
                     os_log("Decoded CBOR data is not a valid JSON object",log: .default,type: .error)
                     throw decodeError.customError(description: "CBOR data is not a valid JSON object")            }

@@ -190,13 +190,13 @@ class PixelPassTests: XCTestCase {
     
     func testBase64EncodedCborDataToJsonConversionSuccess() {
         do {
-            let data = "omd2ZXJzaW9uYzEuMGRkYXRhgaJiazFidjFiazKiZGsyLjGhZmsyLjEuMYHYGEmhZmsyLjEuMQFkazIuMoRDoQEmoRghWQFjMIIBXzCCAQSgAwIBAgIGAYwpA4_aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNfd1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMxMjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdvMUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQw7367PjIwU17ckX_G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc33RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEAo4TsuxDl5-3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOOrwnEYRBmmfhaPor2OZCrbP3U69gYWLulZmsyLjIuMWMxLjBmazIuMi4yZnYyLjIuMmZrMi4yLjOhdmNvbS5leGFtcGxlLm5hbWVzcGFjZTGhAVggChSiDWMcNBzAxM6I-CuUe0P15BIwt06OIiNYkNyITxRmazIuMi40ZnYyLjIuNGZrMi4yLjWjYWHAdDIwMjMtMTItMDRUMTI6NDk6NDFaYWLAdDIwMjMtMTItMDRUMTI6NDk6NDFaYWPAdDIwMzMtMTItMDRUMTI6NDk6NDFaWEAE6jL7xUnhRbxd1LNq9xBA8G_RXGqFhc1GlKASbsfu7Mk-UJZzPvHis7zMRfYl2GNNgiTN-zbjFX_5IDdLi0jr"
+            let data = "qmx1bnNpZ25lZF9pbnQYKmxuZWdhdGl2ZV9pbnQma2J5dGVfc3RyaW5nRN6tvu9rdGV4dF9zdHJpbmdlaGVsbG9lYXJyYXmDAQIDY21hcKJhYQFhYgJjdGFn2QPobHRhZ2dlZF92YWx1ZWVmbG9hdPtACR64UeuFH2ZzaW1wbGX2c2VtYmVkZGVkX2Nib3JfdGFnMjTYGEloZW1iZWRkZWQ="
             let jsonData = try pixelPass.toJson(base64UrlEncodedCborEncodedString: data)
-            let expectedData: [String: Any] = ["data": [["k1": "v1", "k2": ["k2.1": ["k2.1.1": [["k2.1.1": 1]]], "k2.2": [["1": NSNull()], ["33": NSNull()], ["k2.2.4": "v2.2.4", "k2.2.3": ["com.example.namespace1": ["1": 10]], "k2.2.5": ["c": "2033-12-04T12:49:41Z", "b": "2023-12-04T12:49:41Z", "a": "2023-12-04T12:49:41Z"], "k2.2.1": "1.0", "k2.2.2": "v2.2.2"], 4]]]], "version": "1.0"]
+            let expectedData: [String: Any] = ["text_string": "hello", "unsigned_int": 42, "array": [1, 2, 3], "float": 3.14, "embedded_cbor_tag24": "embedded", "map": ["a": 1, "b": 2], "tag": "tagged_value", "negative_int": -7, "simple": NSNull(), "byte_string": "3q2+7w=="]
             
-            XCTAssertEqualDictionaries(expectedData, jsonData)
+            XCTAssertEqualDictionaries(expectedData, jsonData as! [String : Any])
         } catch let error {
-            XCTFail()
+            XCTFail("Expected success, but got error: \(error)")
         }
     }
     
