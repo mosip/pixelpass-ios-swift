@@ -192,7 +192,7 @@ class PixelPassTests: XCTestCase {
         do {
             let data = "qmx1bnNpZ25lZF9pbnQYKmxuZWdhdGl2ZV9pbnQma2J5dGVfc3RyaW5nRN6tvu9rdGV4dF9zdHJpbmdlaGVsbG9lYXJyYXmDAQIDY21hcKJhYQFhYgJjdGFn2QPobHRhZ2dlZF92YWx1ZWVmbG9hdPtACR64UeuFH2ZzaW1wbGX2c2VtYmVkZGVkX2Nib3JfdGFnMjTYGEloZW1iZWRkZWQ="
             let jsonData = try pixelPass.toJson(base64UrlEncodedCborEncodedString: data)
-            let expectedData: [String: Any] = ["text_string": "hello", "unsigned_int": 42, "array": [1, 2, 3], "float": 3.14, "embedded_cbor_tag24": "embedded", "map": ["a": 1, "b": 2], "tag": "tagged_value", "negative_int": -7, "simple": NSNull(), "byte_string": "3q2+7w=="]
+            let expectedData: [String: Any] = ["text_string": "hello", "unsigned_int": 42, "array": [1, 2, 3], "float": 3.14, "embedded_cbor_tag24": "embedded", "map": ["a": 1, "b": 2], "tag": "tagged_value", "negative_int": -7, "simple": NSNull(), "byte_string": "\u{07AD}��"]
             
             XCTAssertEqualDictionaries(expectedData, jsonData as! [String : Any])
         } catch let error {
