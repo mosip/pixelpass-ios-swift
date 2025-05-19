@@ -3,37 +3,26 @@ import SwiftCBOR
 import OSLog
 
 extension CBOR {
-func converToJsonCompatibleFormat() -> Any {
+    func converToJsonCompatibleFormat() -> Any {
         switch self {
         case .array(let array):
             return array.map {
                 $0.converToJsonCompatibleFormat()
             }
-        case .map(let map):
-            var dict = [String: Any]()
-            for (key, value) in map {
-                let keyString: String
-                switch key {
-                case let .utf8String(s):
-                    keyString = s
-                case let .unsignedInt(unsignedInt):
-                    keyString = String(unsignedInt)
-                case let .double(double):
-                    keyString = String(double)
-                default:
-                    keyString = String(describing: key)
-                    os_log("Non-standard key type encountered, converting to string: %{PUBLIC}@", log: OSLog.default, type: .error, keyString)
-                }
-                dict[keyString] = value.converToJsonCompatibleFormat()
+        case .map(let dict):
+            var result = [String: Any]()
+            for (key, value) in dict {
+                let keyString : String = "\(key.converToJsonCompatibleFormat())"
+                result[keyString] = value.converToJsonCompatibleFormat()
+                
             }
-            return dict
+            return result
         case .utf8String(let string):
             return string
         case .byteString(let data):
             do {
                 let decodedCBORIn = try CBOR.decode(data)
-                
-                if(decodedCBORIn==nil){
+                if(decodedCBORIn == nil){
                     return String(decoding: data, as: UTF8.self)
                 }
                 return decodedCBORIn!.converToJsonCompatibleFormat()
@@ -48,8 +37,34 @@ func converToJsonCompatibleFormat() -> Any {
             return unsignedInt
         case .null:
             return NSNull()
+        case .undefined:
+            return NSNull()
+            // Major type 1, value = -1 - (encoded unsigned integer)
+        case .negativeInt(let negativeInt):
+            return -1 - Int64(negativeInt)
         case .tagged(_, let taggedValue):
             return taggedValue.converToJsonCompatibleFormat()
+        //simple type values assigned - https://datatracker.ietf.org/doc/html/rfc7049#section-2.3
+        case .simple(let simpleValue):
+            switch simpleValue {
+            case 20:
+                return false
+            case 21:
+                return true
+            case 22:
+                return NSNull()
+            case 23: // undefined in CBOR
+                return NSNull()
+            default:
+                return Int(simpleValue)
+            }
+        case .date(let date):
+            let formatter = ISO8601DateFormatter()
+            return formatter.string(from: date)
+        case let .float(floatValue):
+            return floatValue
+        case let .half(half):
+            return Float(half)
         default:
             os_log("Unhandled or non-JSON-compatible CBOR type encountered: %{PUBLIC}@", log: OSLog.default, type: .error, String(describing: self))
             return NSNull()
@@ -61,7 +76,7 @@ func convertToCBOREncodableFormat(input: Any) -> CBOR? {
     switch input {
     case let array as [Any]:
         return .array(array.compactMap { convertToCBOREncodableFormat(input: $0) })
-
+        
     case let dict as [String: Any]:
         var map = [CBOR: CBOR]()
         for (key, value) in dict {
