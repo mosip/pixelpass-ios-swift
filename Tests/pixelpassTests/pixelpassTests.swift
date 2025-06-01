@@ -201,14 +201,14 @@ class PixelPassTests: XCTestCase {
     }
     
     func testBase64EncodedCborDataToJsonConversionThrowsErrorWhenDecodingFails() {
-        let data = "omd2ZXJzaW9uYzEuMGRkYXRhgaJiazFidjFiazKiZGsyLjGhZmsyLjEuMYHYGEmhZmsyLjEuMQFkazIuMoRDoQEmoRghWQFjMIIBXzCCAQSgAwIBAgIGAYwpA4_aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNfd1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMxMjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdvMUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQw7367PjIwU17ckX_G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc33RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEAo4TsuxDl5-3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOOrwnEYRBmmfhaPor2OZCrbP3U69gYWK2lZmsyLjIuMWMxLjBmazIuMi4yZnYyLjIuMmZrMi4yLjOhaGsyLjIuMy4xoQFYIAoUog1jHDQcwMTOiPgrlHtD9eQSMLdOjiIjWJDciE8UZmsyLjIuNGZ2Mi4yLjRmazIuMi41o2FhwHQyMDIzLTEyLTA0VDEyOjQ5OjQxWmFiwHQyMDIzLTEyLTA0VDEyOjQ5OjQxWmFjwHQyMDMzLTEyLTA0VDEyOjQ5OjQxWlhABOoy-8VJ4UW8XdSzavcQQPBv0VxqhYXNRpSgEm7H7uzJPlCWcz7x4rO8zEX2JdhjTYIkzfs24xV_-SA3S4tI6w"
+        let data = "omd2ZXJzaW9uYzEuMGRkYXRhgaJiazFidjFiazKiZGsyLjGhZmsyLjEuMYHYGEmhZmsyLjEuMQFkazIuMoRDoQEmoRghWQFjMIIBXzCCAQSgAwIBAgIGAYwpA4_aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNfd1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMxMjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdvMUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQw7367PjIwU17ckX_G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc33RVkgEE6q9iAAeLhl85IraAzT39SjOBV6w"
         
         XCTAssertThrowsError(try pixelPass.toJson(base64UrlEncodedCborEncodedString: data)) { error in
             guard case let decodeByteArrayError.customError(message) = error else {
-                return XCTFail("Expected decodeByteArrayError.customError, but got a different error")
+                return XCTFail("Expected decodeError.customError, but got a different error")
             }
             
-            XCTAssertEqual(message, "error occurred while parsing  data - The operation couldn’t be completed. (pixelpass.decodeByteArrayError error 0.)", "The error message does not match")
+            XCTAssertEqual(message, "error occurred while parsing  data - The operation couldn’t be completed. (pixelpass.decodeError error 0.)", "The error message does not match")
         }
     }
 }
