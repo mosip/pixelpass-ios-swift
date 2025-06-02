@@ -2,10 +2,15 @@ import Foundation
 
 extension Data {
     init?(base64EncodedURLSafe string: String, options: Base64DecodingOptions = []) {
-        let string =
+        var string =
         string
             .replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")
+        
+        let remainder = string.count % 4
+               if remainder > 0 {
+                   string.append(String(repeating: "=", count: 4 - remainder))
+               }
         
         self.init(base64Encoded: string, options: options)
     }
