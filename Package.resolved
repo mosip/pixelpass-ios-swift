@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/abhip2565/SwiftCBOR",
       "state" : {
-        "branch" : "long-cbor-decode-crash-fix",
-        "revision" : "ecb490830e395df54eb06951e58a75d3d7443cf1"
+        "branch" : "release-0.1.x",
+        "revision" : "cc4e195a0ea2dce88f2fd6c6d73b2504e3c884fd"
       }
     },
     {
