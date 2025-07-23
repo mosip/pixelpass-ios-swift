@@ -41,7 +41,13 @@ extension CBOR {
             return NSNull()
             // Major type 1, value = -1 - (encoded unsigned integer)
         case .negativeInt(let negativeInt):
-            return -1 - Int64(negativeInt)
+            if negativeInt <= UInt64(Int64.max) {
+                    // Fits in Int64 safely
+                    return -1 - Int64(negativeInt)
+                } else {
+                    // Too big to fit! Return as String to avoid crashing
+                    return "-1 - \(negativeInt)"
+                }
         case .tagged(_, let taggedValue):
             return taggedValue.converToJsonCompatibleFormat()
         //simple type values assigned - https://datatracker.ietf.org/doc/html/rfc7049#section-2.3
