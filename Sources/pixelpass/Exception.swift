@@ -8,3 +8,7 @@ enum decodeByteArrayError: Error{
 enum decodeError: Error {
     case customError(description: String)
 }
+
+enum QRDataOverflowException: Error {
+    case customError(description: String)
+}
